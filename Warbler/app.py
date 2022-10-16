@@ -1,5 +1,6 @@
 import os
 
+from CREDENTIALS import username, password, dbname
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
@@ -12,11 +13,7 @@ CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
 
-# Get DB_URI from environ variable (useful for production/testing) or,
-# if not set there, use development local db.
-username = "postgres"
-password = "kitty"
-dbname = "warbler"
+
 app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{username}:{password}@localhost:5432/{dbname}"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
