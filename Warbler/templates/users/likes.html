@@ -13,14 +13,14 @@
           </a>
 
           <div class="message-area">
-            <a href="/users/{{ user.id }}">@{{ user.username }}</a>
+            <a href="/users/{{ user.id }}">@{{ message.user.username }}</a>
             <span class="text-muted">{{ message.timestamp.strftime('%d %B %Y') }}</span>
             <p>{{ message.text }}</p>
           </div>
 
           {% if user.id == g.user.id %}
-          <form method="POST" action="/message/{{ message.id }}/like" class=messages-like">
-            <button class="btn btn-sm">
+          <form method="POST" action="/messages/{{ message.id }}/like" id="messages-form">
+            <button class="btn btn-sm btn-primary">
               <i class="fa fa-thumbs-up"></i>
             </button>
           </form>

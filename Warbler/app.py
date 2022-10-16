@@ -81,7 +81,7 @@ def signup():
             db.session.commit()
 
         except IntegrityError:
-            flash("Username already taken", 'danger')
+            flash("Username/email already taken", 'danger')
             return render_template('users/signup.html', form=form)
 
         do_login(user)
@@ -154,7 +154,9 @@ def users_show(user_id):
                 .limit(100)
                 .all())
 
-    return render_template('users/show.html', user=user, messages=messages)
+    likes = g.user.likes
+
+    return render_template('users/show.html', user=user, messages=messages, likes=likes)
 
 @app.route('/users/<int:user_id>/likes')
 def users_likes(user_id):
@@ -236,11 +238,16 @@ def profile():
 
     if form.validate_on_submit():
         if User.authenticate(user.username, form.password.data):
-            user.username = form.username.data
-            user.email = form.email.data
-            user.image_url = form.image_url.data
-            user.header_image_url = form.header_image_url.data
-            user.bio = form.bio.data
+            if form.username.data:
+                user.username = form.username.data
+            if form.email.data:
+                user.email = form.email.data
+            if form.image_url.data:
+                user.image_url = form.image_url.data
+            if form.header_image_url.data:
+                user.header_image_url = form.header_image_url.data
+            if form.bio.data:
+                user.bio = form.bio.data
 
             db.session.commit()
             return redirect(f"/users/{user.id}")
@@ -284,7 +291,7 @@ def messages_add():
     form = MessageForm()
 
     if form.validate_on_submit():
-        msg = Message(text=form.text.data)
+        msg = Message(text=form.text.data, user_id=g.user.id)
         g.user.messages.append(msg)
         db.session.commit()
 
@@ -322,7 +329,7 @@ def add_like(message_id):
 
     db.session.commit()
 
-    return redirect("/")
+    return redirect(f"/users/{g.user.id}/likes")
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
@@ -334,6 +341,10 @@ def messages_destroy(message_id):
         return redirect("/")
 
     msg = Message.query.get(message_id)
+    if msg.user_id != g.user.id:
+        flash("You can't delete other people's messages.")
+        return redirect(f"/messages/{message_id}")
+
     db.session.delete(msg)
     db.session.commit()
 
